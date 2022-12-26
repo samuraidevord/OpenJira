@@ -2,6 +2,7 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { db } from "../../database";
 import { Entry, IEntry } from "../../models";
+import mongoose from "mongoose";
 type Data = IEntry[];
 
 export default function handler(
@@ -12,8 +13,10 @@ export default function handler(
 }
 
 const getEntries = async (res: NextApiResponse<Data>) => {
-  await db.connect();
+  await mongoose.connect(
+    "mongodb+srv://admin:RrnpBdXszdmKrvnz@open-jira-bbdd.uoxf74n.mongodb.net/entries-bbdd?retryWrites=true&w=majority"
+  );
   const entries = await Entry.find().sort({ createdAt: "ascending" });
-  await db.disconnect();
+  await mongoose.disconnect();
   return res.status(200).json(entries);
 };
