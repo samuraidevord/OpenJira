@@ -14,10 +14,8 @@ export const EntryList: FC<Props> = ({ status }) => {
   // dichas enries cambien.
   const { entries, updateEntry } = useContext(EntriesContext);
   const { isDragging, setisDragging } = useContext(UIContext);
-  const entriesByStatus = useMemo(
-    () => entries.filter((entry) => entry.status === status),
-    [entries]
-  );
+  const entriesByStatus = entries.filter((entry) => entry.status === status);
+
   const allowDrop = (event: DragEventHandler<HTMLDivElement> | any) => {
     event.preventDefault();
   };
