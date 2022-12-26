@@ -35,11 +35,10 @@ const postEntry = async (req: NextApiRequest, res: NextApiResponse<Data>) => {
     description,
     createdAt: Date.now(),
   });
+  await db.connect();
   try {
-    await db.connect();
     await newEntry.save();
     await db.disconnect();
-
     return res.status(201).json(newEntry);
   } catch (error) {
     await db.disconnect();
