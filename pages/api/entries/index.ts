@@ -1,12 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { db } from "../../../database";
 import { Entry, IEntry } from "../../../models";
-
-type Data =
-  | {
-      message: string;
-    }
-  | IEntry[];
+type Data = {
+  message: string;
+  ok: boolean;
+  method: string;
+};
 
 export default function handler(
   req: NextApiRequest,
@@ -17,15 +16,27 @@ export default function handler(
     message: "Todo correcto!!",
     method: req.method || "No hay método",
   });
-  // switch (req.method) {
-  //   case "GET":
-  //     return getEntries(res);
-  //   case "POST":
-  //     return postEntry(req, res);
-  //   default:
-  //     return res.status(400).json({ message: "Endpoint no existe" });
-  // }
 }
+
+// type Data =
+//   | {
+//       message: string;
+//     }
+//   | IEntry[];
+
+// export default function Handler(
+//   req: NextApiRequest,
+//   res: NextApiResponse<Data>
+// ) {
+//   switch (req.method) {
+//     case "GET":
+//       return getEntries(res);
+//     case "POST":
+//       return postEntry(req, res);
+//     default:
+//       return res.status(400).json({ message: "Endpoint no existe" });
+//   }
+// }
 
 // const getEntries = async (res: NextApiResponse<Data>) => {
 //   await db.connect();
@@ -40,8 +51,8 @@ export default function handler(
 //     description,
 //     createdAt: Date.now(),
 //   });
-//   await db.connect();
 //   try {
+//     await db.connect();
 //     await newEntry.save();
 //     await db.disconnect();
 //     return res.status(201).json(newEntry);
