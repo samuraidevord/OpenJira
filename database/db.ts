@@ -8,7 +8,9 @@ import mongoose from "mongoose";
  */
 
 export const connect = async () => {
-  await mongoose.connect(process.env.MONGO_URL!);
+  await mongoose.connect(
+    "mongodb+srv://admin:RrnpBdXszdmKrvnz@open-jira-bbdd.uoxf74n.mongodb.net/entries-bbdd?retryWrites=true&w=majority"
+  );
 };
 
 export const disconnect = async () => {
