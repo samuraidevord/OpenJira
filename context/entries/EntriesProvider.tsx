@@ -1,70 +1,110 @@
-import { FC, useReducer } from "react";
+import { FC, useReducer, useEffect } from "react";
 
-import { v4 as uuidv4 } from "uuid";
+import { useSnackbar } from "notistack";
+
 import { EntriesContext, EntriesReducer } from "./";
+
 import { Entry } from "../../interfaces";
+import { entriesApi } from "../../apis";
+import { useRouter } from "next/router";
 export interface EntriesState {
   entries: Entry[];
 }
 
 const Entries_INITIAL_STATE: EntriesState = {
-  entries: [
-    {
-      _id: uuidv4(),
-      description:
-        "Pendiente: Lorem ipsum dolor sit, amet consectetur adipisicing elit. Animi, libero.",
-      status: "pending",
-      createdAt: Date.now(),
-    },
-    {
-      _id: uuidv4(),
-      description:
-        "En Progreso: Lorem ipsum dolor sit amet consectetur adipisicing elit.",
-      status: "in-progress",
-      createdAt: Date.now() - 1000000,
-    },
-    {
-      _id: uuidv4(),
-      description:
-        "Finalizado: Lorem ipsum dolor sit amet consectetur adipisicing elit.",
-      status: "finished",
-      createdAt: Date.now() - 500000,
-    },
-    {
-      _id: uuidv4(),
-      description:
-        "En progreso: Lorem ipsum dolor sit amet consectetur adipisicing elit.",
-      status: "in-progress",
-      createdAt: Date.now() - 400000,
-    },
-  ],
+  entries: [],
 };
 interface Props {
   children: JSX.Element;
 }
 export const EntriesProvider: FC<Props> = ({ children }) => {
+  const router = useRouter();
   const [state, dispatch] = useReducer(EntriesReducer, Entries_INITIAL_STATE);
-  const AddEntry = (description: string) => {
-    const newEntry: Entry = {
-      _id: uuidv4(),
+  const { enqueueSnackbar } = useSnackbar();
+  const AddEntry = async (description: string) => {
+    const { data } = await entriesApi.post<Entry>("/entries", {
       description,
-      createdAt: Date.now(),
-      status: "pending",
-    };
+    });
     dispatch({
       type: "[Entry - Add-Entry]",
-      payload: newEntry,
+      payload: data,
     });
   };
-  const updateEntry = (entry: Entry) => {
-    dispatch({ type: "[Entry - Entry-Updated]", payload: entry });
+  const updateEntry = async (
+    { _id, description, status }: Entry,
+    showSnacbar = false
+  ) => {
+    try {
+      const reponse = await fetch(
+        process.env.NEXT_PUBLIC_HOST + "api/entries/" + _id,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ status, description }),
+        }
+      );
+      const data = await reponse.json();
+      dispatch({ type: "[Entry - Entry-Updated]", payload: data });
+      if (showSnacbar) {
+        enqueueSnackbar("Entada actualizada", {
+          variant: "success",
+          autoHideDuration: 1500,
+          anchorOrigin: {
+            vertical: "top",
+            horizontal: "right",
+          },
+        });
+      }
+      setTimeout(() => {
+        router.push("/");
+      }, 1500);
+    } catch (error) {
+      console.log({ error });
+    }
   };
+  const refreshEntries = async () => {
+    try {
+      const reponse = await fetch(process.env.NEXT_PUBLIC_HOST + "api/entries");
+      const data = await reponse.json();
+      dispatch({ type: "[Entry - Refresh-data]", payload: data });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const deleteEntries = async (_id: string) => {
+    const reponse = await fetch(
+      process.env.NEXT_PUBLIC_HOST + "api/entries/" + _id,
+      {
+        method: "DELETE",
+      }
+    );
+    const data = await reponse.json();
+    console.log(data);
+    dispatch({ type: "[Entry - Delete-Entry]", payload: data });
+
+    enqueueSnackbar("Entada eliminada correctamente", {
+      variant: "success",
+      autoHideDuration: 1500,
+      anchorOrigin: {
+        vertical: "top",
+        horizontal: "right",
+      },
+    });
+    setTimeout(() => {
+      router.push("/");
+    }, 1500);
+  };
+  useEffect(() => {
+    refreshEntries();
+  }, []);
+
   return (
     <EntriesContext.Provider
       value={{
         ...state,
         AddEntry,
         updateEntry,
+        deleteEntries,
       }}
     >
       {children}

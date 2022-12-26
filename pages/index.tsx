@@ -1,7 +1,7 @@
 // NextJS
 import type { NextPage } from "next";
 // Material UI
-import { Grid, Typography, Card, CardHeader, CardContent } from "@mui/material";
+import { Grid, Card, CardHeader, CardContent } from "@mui/material";
 import { Layout } from "../components/layouts";
 import { EntryList, NewEntry } from "../components/ui";
 const HomePage: NextPage = () => {
