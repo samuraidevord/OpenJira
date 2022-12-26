@@ -64,8 +64,7 @@ export const EntriesProvider: FC<Props> = ({ children }) => {
   };
   const refreshEntries = async () => {
     try {
-      const reponse = await fetch(process.env.NEXT_PUBLIC_HOST + "api/entries");
-      const data = await reponse.json();
+      const { data } = await entriesApi.get<Entry[]>("/entries");
       dispatch({ type: "[Entry - Refresh-data]", payload: data });
     } catch (error) {
       console.log(error);
