@@ -5,18 +5,15 @@ import { Entry, IEntry } from "../../models";
 import mongoose from "mongoose";
 type Data = IEntry[];
 
-export default function handler(
-  req: NextApiRequest,
-  res: NextApiResponse<Data>
-) {
-  return getEntries(res);
+async function handler(req: NextApiRequest, res: NextApiResponse<Data>) {
+  if (req.method == "GET") {
+    await mongoose.connect(
+      "mongodb+srv://admin:RrnpBdXszdmKrvnz@open-jira-bbdd.uoxf74n.mongodb.net/entries-bbdd?retryWrites=true&w=majority"
+    );
+    const entries = await Entry.find().sort({ createdAt: "ascending" });
+    await mongoose.disconnect();
+    return res.status(200).json(entries);
+  }
 }
 
-const getEntries = async (res: NextApiResponse<Data>) => {
-  await mongoose.connect(
-    "mongodb+srv://admin:RrnpBdXszdmKrvnz@open-jira-bbdd.uoxf74n.mongodb.net/entries-bbdd?retryWrites=true&w=majority"
-  );
-  const entries = await Entry.find().sort({ createdAt: "ascending" });
-  await mongoose.disconnect();
-  return res.status(200).json(entries);
-};
+export default handler;
